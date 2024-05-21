@@ -29,6 +29,26 @@ public class Principal {
                 .map(l -> l.titulo().toUpperCase())
                 .forEach(System.out::println);
 
+        //Búsqueda de libros por nombre
+        System.out.println("Ingrese el nombre del libro que desea buscar: ");
+        var tituloLibro = lectura.nextLine();
+        json = consumoAPI.obtenerDatos(URL_BASE + "?search=" + tituloLibro.replace(" ", "+"));
+        var datosBusqueda = conversor.obtenerDatos(json, Datos.class);
+        Optional<DatosLibros> libroBuscado = datosBusqueda.resultados().stream()
+                .filter(l -> l.titulo().toUpperCase().contains(tituloLibro.toUpperCase()))
+                .findFirst();
+        if (libroBuscado.isPresent()) {
+            System.out.println("Libro encontrado ");
+            System.out.println(libroBuscado.get());
+        } else {
+            System.out.println("Libro no encontrado ");
+        }
 
+        //Trabajando con estadísticas
+        DoubleSummaryStatistics est = datos.resultados().stream()
+                .filter(d -> d.numeroDescargas() > 0)
+                .collect(Collectors.summarizingDouble(DatosLibros::numeroDescargas));
+        System.out.println("Cantidad media de descargas: " + est.getAverage());
+        System.out.println("Cantidad máxima de descargas: " + est.getMax());
     }
 }
